@@ -28,17 +28,17 @@ export default function StackedAreaChart(container) {
 
 	
 
-    let xDomain, data;
+    
+    let selected = null, xDomain, data;
 	function update(_data){
-        //let selected = null, xDomain, data;
         data=_data;
 
-       // const keys = selected? [selected] : data;
+        const keys = selected? [selected] : data.columns.slice(1);
 
         
 
         var series = d3.stack()
-        .keys(data.columns.slice(1))
+        .keys(keys)
         .offset(d3.stackOffsetNone)
         (data)
     
@@ -56,7 +56,7 @@ export default function StackedAreaChart(container) {
         const yAxis = d3.axisLeft(yScale);
         svg.select('.axis-y-axis').call(yAxis);
 
-        colorScale.domain(data.columns.slice(1))
+        colorScale.domain(keys)
 
         const area=d3.area()
         .x(d=>xScale(d.data.date))
@@ -66,11 +66,12 @@ export default function StackedAreaChart(container) {
         var tooltip=d3.select('.tooltip')
         .style('position','fixed')
         
-        svg.append('g')
-        .selectAll('path')
-        .attr('class','areas')
-        .data(series)
-        .join('path')
+        const areas = svg.selectAll('.area')
+        .data(series,d=>d.key);
+
+        areas.enter().append('path')
+        .attr('class','area')
+        .merge(areas)
         .attr('fill',d=>colorScale(d))
         .attr('d',area)
         .on('mouseenter',(event,d)=>{
@@ -80,7 +81,7 @@ export default function StackedAreaChart(container) {
         .on('mouseleave',(event,d)=>{
             tooltip.style('display','none');
         })
-        /*.on('click',(event,d)=>{
+        .on('click',(event,d)=>{
             if (selected === d.key){
                 selected=null;
             }
@@ -88,11 +89,8 @@ export default function StackedAreaChart(container) {
                 selected=d.key;
             }
             update(data);
-        });*/
-    
-        
-        
-
+        });
+        areas.exit().remove();
 
 
 
