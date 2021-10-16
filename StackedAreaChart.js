@@ -34,7 +34,6 @@ export default function StackedAreaChart(container) {
         data=_data;
 
         const keys = selected? [selected] : data.columns.slice(1);
-
         
 
         var series = d3.stack()
